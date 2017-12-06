@@ -15,13 +15,14 @@ import java.util.List;
  * Created by Claudio on 03/12/2017.
  */
 
-class GetFlickrJsonData extends AsyncTask<String,Void,List<Photo> > implements GetRawData.OnDownloadComplete {
+class GetFlickrJsonData extends AsyncTask<String, Void, List<Photo>> implements GetRawData.OnDownloadComplete {
     private static final String TAG = "GetFlickrJsonData";
     private final OnDataAvailable mCallBack;
     private List<Photo> mPhotoList = null;
     private String mBaseURL;
     private String mLanguage;
     private boolean mMatchAll;
+    private boolean runningOnSameThread = false;
 
     public GetFlickrJsonData(OnDataAvailable callBack, String baseURL, String language, boolean matchAll) {
         Log.d(TAG, "GetFlickrJsonData called");
@@ -33,6 +34,7 @@ class GetFlickrJsonData extends AsyncTask<String,Void,List<Photo> > implements G
 
     void executeOnSameThread(String searchCriteria) {
         Log.d(TAG, "executeOnSameThread:  Start");
+        runningOnSameThread = true;
         String destinationUri = createUri(searchCriteria, mLanguage, mMatchAll);
 
         GetRawData getRawData = new GetRawData(this);
@@ -43,8 +45,8 @@ class GetFlickrJsonData extends AsyncTask<String,Void,List<Photo> > implements G
     @Override
     protected void onPostExecute(List<Photo> photos) {
         Log.d(TAG, "onPostExecute:  começou o método.");
-        if (mCallBack != null){
-            mCallBack.onDataAvailable(mPhotoList,DownloadStatus.OK);
+        if (mCallBack != null) {
+            mCallBack.onDataAvailable(mPhotoList, DownloadStatus.OK);
         }
         Log.d(TAG, "onPostExecute: terminou o método.");
     }
@@ -53,7 +55,7 @@ class GetFlickrJsonData extends AsyncTask<String,Void,List<Photo> > implements G
     protected List<Photo> doInBackground(String... params) {
 
         Log.d(TAG, "doInBackground: começou.");
-        String destinationUri = createUri(params[0], mLanguage,mMatchAll);
+        String destinationUri = createUri(params[0], mLanguage, mMatchAll);
         GetRawData getRawData = new GetRawData(this);
         getRawData.runInSameThread(destinationUri);
         Log.d(TAG, "doInBackground:  terminou.");
@@ -106,7 +108,7 @@ class GetFlickrJsonData extends AsyncTask<String,Void,List<Photo> > implements G
             }
         }
 
-        if (mCallBack != null) {
+        if (runningOnSameThread && mCallBack != null) {
             // informamos que o chamador do processo já terminou, e tbm possivelmente retornou nulo se houver um erro.
             mCallBack.onDataAvailable(mPhotoList, status);
         }
