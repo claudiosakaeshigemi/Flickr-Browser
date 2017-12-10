@@ -25,17 +25,15 @@ public class MainActivity extends BaseActivity implements GetFlickrJsonData.OnDa
         setContentView(R.layout.activity_main);
 
         activateToolbar(false);
-
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, recyclerView, this));
-
         mFlickrRecyclerViewAdapter = new FlickrRecyclerViewAdapter(this, new ArrayList<Photo>());
         recyclerView.setAdapter(mFlickrRecyclerViewAdapter);
 
         Log.d(TAG, "onCreate: TERMINOU");
     }
+
     @Override
     protected void onResume() {
         Log.d(TAG, "onResume starts");
@@ -73,7 +71,7 @@ public class MainActivity extends BaseActivity implements GetFlickrJsonData.OnDa
     @Override
     public void onDataAvailable(List<Photo> data, DownloadStatus status) {
         Log.d(TAG, "onDataAvailable: starts");
-        if(status == DownloadStatus.OK) {
+        if (status == DownloadStatus.OK) {
             mFlickrRecyclerViewAdapter.loadNewData(data);
         } else {
             // download or processing failed
@@ -93,7 +91,7 @@ public class MainActivity extends BaseActivity implements GetFlickrJsonData.OnDa
     public void onItemLongClick(View view, int position) {
         Log.d(TAG, "onItemLongClick: starts");
 //        Toast.makeText(MainActivity.this, "Long tap at position " + position, Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this,PhotoDetailActivity.class);
+        Intent intent = new Intent(this, PhotoDetailActivity.class);
         intent.putExtra(PHOTO_TRANSFER, mFlickrRecyclerViewAdapter.getPhoto(position));
         startActivity(intent);
     }

@@ -7,6 +7,7 @@ import java.io.Serializable;
  */
 
 class Photo implements Serializable{
+    private static final long serialVerisonUID = 1L;
     private String mTitle;
     private String mAuthor;
     private String mAuthorId;
