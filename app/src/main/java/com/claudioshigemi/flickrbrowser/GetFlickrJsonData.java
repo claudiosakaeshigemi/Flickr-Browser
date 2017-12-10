@@ -24,6 +24,10 @@ class GetFlickrJsonData extends AsyncTask<String, Void, List<Photo>> implements 
     private boolean mMatchAll;
     private boolean runningOnSameThread = false;
 
+    interface OnDataAvailable {
+        void onDataAvailable(List<Photo> data, DownloadStatus status);
+    }
+
     public GetFlickrJsonData(OnDataAvailable callBack, String baseURL, String language, boolean matchAll) {
         Log.d(TAG, "GetFlickrJsonData called");
         mBaseURL = baseURL;
@@ -32,33 +36,35 @@ class GetFlickrJsonData extends AsyncTask<String, Void, List<Photo>> implements 
         mMatchAll = matchAll;
     }
 
+
     void executeOnSameThread(String searchCriteria) {
-        Log.d(TAG, "executeOnSameThread:  Start");
+        Log.d(TAG, "executeOnSameThread COMEÇOU");
         runningOnSameThread = true;
         String destinationUri = createUri(searchCriteria, mLanguage, mMatchAll);
 
         GetRawData getRawData = new GetRawData(this);
         getRawData.execute(destinationUri);
-        Log.d(TAG, "executeOnSameThread:  terminou. ");
+        Log.d(TAG, "executeOnSameThread  TERMINOU");
     }
 
     @Override
     protected void onPostExecute(List<Photo> photos) {
-        Log.d(TAG, "onPostExecute:  começou o método.");
-        if (mCallBack != null) {
+        Log.d(TAG, "onPostExecute COMEÇOU O MÉTODO");
+
+        if(mCallBack != null) {
             mCallBack.onDataAvailable(mPhotoList, DownloadStatus.OK);
         }
-        Log.d(TAG, "onPostExecute: terminou o método.");
+        Log.d(TAG, "onPostExecute  TERMINOU O MÉTODO");
     }
 
     @Override
     protected List<Photo> doInBackground(String... params) {
-
-        Log.d(TAG, "doInBackground: começou.");
+        Log.d(TAG, "doInBackground COMEÇOU O MÉTODO");
         String destinationUri = createUri(params[0], mLanguage, mMatchAll);
+
         GetRawData getRawData = new GetRawData(this);
         getRawData.runInSameThread(destinationUri);
-        Log.d(TAG, "doInBackground:  terminou.");
+        Log.d(TAG, "doInBackground TERMINOU O MÉTODO");
         return mPhotoList;
     }
 
@@ -76,15 +82,16 @@ class GetFlickrJsonData extends AsyncTask<String, Void, List<Photo>> implements 
 
     @Override
     public void onDownloadComplete(String data, DownloadStatus status) {
-        Log.d(TAG, "onDownloadComplete:  começando. status = " + status);
-        if (status == DownloadStatus.OK) {
+        Log.d(TAG, "onDownloadComplete starts. Status = " + status);
+
+        if(status == DownloadStatus.OK) {
             mPhotoList = new ArrayList<>();
 
             try {
                 JSONObject jsonData = new JSONObject(data);
                 JSONArray itemsArray = jsonData.getJSONArray("items");
 
-                for (int i = 0; i < itemsArray.length(); i++) {
+                for(int i=0; i<itemsArray.length(); i++) {
                     JSONObject jsonPhoto = itemsArray.getJSONObject(i);
                     String title = jsonPhoto.getString("title");
                     String author = jsonPhoto.getString("author");
@@ -101,24 +108,25 @@ class GetFlickrJsonData extends AsyncTask<String, Void, List<Photo>> implements 
 
                     Log.d(TAG, "onDownloadComplete " + photoObject.toString());
                 }
-            } catch (JSONException jsone) {
+            } catch(JSONException jsone) {
                 jsone.printStackTrace();
-                Log.e(TAG, "onDownloadComplete:  Erro ao processar JSon Data. " + jsone.getMessage());
+                Log.e(TAG, "onDownloadComplete: Error processing Json data " + jsone.getMessage());
                 status = DownloadStatus.FAILED_OR_EMPTY;
             }
         }
 
-        if (runningOnSameThread && mCallBack != null) {
-            // informamos que o chamador do processo já terminou, e tbm possivelmente retornou nulo se houver um erro.
+        if(runningOnSameThread && mCallBack != null) {
+            // now inform the caller that processing is done - possibly returning null if there
+            // was an error
             mCallBack.onDataAvailable(mPhotoList, status);
         }
-        Log.d(TAG, "onDownloadComplete:  terminou. ");
-    }
 
-    interface OnDataAvailable {
-        void onDataAvailable(List<Photo> data, DownloadStatus status);
+        Log.d(TAG, "onDownloadComplete TERMINOU O MÉTODO ");
     }
 }
+
+
+
 
 
 

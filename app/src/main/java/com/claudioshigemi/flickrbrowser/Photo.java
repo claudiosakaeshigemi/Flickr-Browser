@@ -1,10 +1,12 @@
 package com.claudioshigemi.flickrbrowser;
 
+import java.io.Serializable;
+
 /**
  * Created by Claudio on 03/12/2017.
  */
 
-class Photo {
+class Photo implements Serializable{
     private String mTitle;
     private String mAuthor;
     private String mAuthorId;
